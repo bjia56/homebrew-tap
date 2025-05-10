@@ -8,6 +8,5 @@ class Cosmotop < Formula
 
   def install
     bin.install "cosmotop.exe"
-    bin.install_symlink "cosmotop.exe" => "cosmotop"
   end
 end

@@ -7,7 +7,7 @@ class Cosmotop < Formula
   license "Apache-2.0"
 
   def install
-    bin.install_symlink "cosmotop.exe" => "cosmotop"
+    bin.install "cosmotop.exe" => "cosmotop.exe"
   end
 
   test do

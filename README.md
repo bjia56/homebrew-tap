@@ -1,2 +1,2 @@
-# homebrew-taps
-Homebrew taps maintained by bjia56
+# homebrew-tap
+Homebrew tap maintained by bjia56

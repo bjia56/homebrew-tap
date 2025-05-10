@@ -7,10 +7,13 @@ class Cosmotop < Formula
   license "Apache-2.0"
 
   def install
-    (bin/"cosmotop").write <<~EOS
+    libexec.install "cosmotop.exe"
+    launcher = <<~EOS
       #!/bin/bash
-      chmod +x "#{prefix}/bin/cosmotop.exe" >/dev/null 2>&1
-      exec "#{prefix}/bin/cosmotop.exe" "$@"
+      chmod +x "#{prefix}/libexec/cosmotop.exe" >/dev/null 2>&1
+      exec "#{prefix}/libexec/cosmotop.exe" "$@"
     EOS
+    (bin/"cosmotop").write launcher
+    (bin/"cosmotop.exe").write launcher
   end
 end

@@ -53,29 +53,17 @@ jobs:
             exit 1
           fi
 
-      # Commit the changes
-      - name: Commit changes
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git checkout -b update-cosmotop-formula
-          git add Formula/cosmotop.rb
-          git commit -m "Update cosmotop formula to ${{ env.latest_release }}"
-
-      # Push changes to a new branch
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          branch: update-cosmotop-formula
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       # Create a pull request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          commit-message: "Update cosmotop formula to ${{ env.latest_release }}"
+          title: "Update cosmotop formula to ${{ env.latest_release }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update-cosmotop-formula
-          title: "Update cosmotop formula to ${{ env.latest_release }}"
+          delete-branch: true
           body: |
             This PR updates the `cosmotop` formula to the latest release: `${{ env.latest_release }}`.
             - **Version**: `${{ env.latest_release }}`

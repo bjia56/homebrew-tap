@@ -1,0 +1,80 @@
+name: Update Cosmotop Formula
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch: # Allow manual triggering of the workflow
+
+jobs:
+  update-formula:
+    name: Check and Update Cosmotop Formula
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Fetch the latest release of cosmotop
+      - name: Get latest release
+        id: get_latest_release
+        run: |
+          latest_release=$(curl --silent "https://api.github.com/repos/bjia56/cosmotop/releases/latest" | jq -r .tag_name)
+          latest_asset_url=$(curl --silent "https://api.github.com/repos/bjia56/cosmotop/releases/latest" | jq -r '.assets[0].browser_download_url')
+          echo "Latest release: $latest_release"
+          echo "Latest asset URL: $latest_asset_url"
+          echo "latest_release=$latest_release" >> $GITHUB_ENV
+          echo "latest_asset_url=$latest_asset_url" >> $GITHUB_ENV
+
+      # Download the artifact and calculate the sha256 checksum
+      - name: Calculate sha256 checksum
+        id: calculate_checksum
+        run: |
+          curl -L -o artifact.tar.gz "${{ env.latest_asset_url }}"
+          sha256_checksum=$(shasum -a 256 artifact.tar.gz | awk '{print $1}')
+          echo "SHA256 checksum: $sha256_checksum"
+          echo "sha256_checksum=$sha256_checksum" >> $GITHUB_ENV
+
+      # Update the formula file
+      - name: Update formula
+        run: |
+          latest_release="${{ env.latest_release }}"
+          sha256_checksum="${{ env.sha256_checksum }}"
+          formula_file="Formula/cosmotop.rb"
+
+          # Replace the version and sha256 in the formula file
+          if [[ -f "$formula_file" ]]; then
+            sed -i "s/^  version \".*\"/  version \"$latest_release\"/" "$formula_file"
+            sed -i "s/^  sha256 \".*\"/  sha256 \"$sha256_checksum\"/" "$formula_file"
+          else
+            echo "Formula file not found!"
+            exit 1
+          fi
+
+      # Commit the changes
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git checkout -b update-cosmotop-formula
+          git add Formula/cosmotop.rb
+          git commit -m "Update cosmotop formula to ${{ env.latest_release }}"
+
+      # Push changes to a new branch
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          branch: update-cosmotop-formula
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Create a pull request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-cosmotop-formula
+          title: "Update cosmotop formula to ${{ env.latest_release }}"
+          body: |
+            This PR updates the `cosmotop` formula to the latest release: `${{ env.latest_release }}`.
+            - **Version**: `${{ env.latest_release }}`
+            - **SHA256**: `${{ env.sha256_checksum }}`

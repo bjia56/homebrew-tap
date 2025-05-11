@@ -10,7 +10,8 @@ jobs:
     name: Check and Update Cosmotop Formula
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  
+      pull-requests: write
 
     steps:
       # Checkout the repository
@@ -36,6 +37,7 @@ jobs:
           sha256_checksum=$(shasum -a 256 artifact.tar.gz | awk '{print $1}')
           echo "SHA256 checksum: $sha256_checksum"
           echo "sha256_checksum=$sha256_checksum" >> $GITHUB_ENV
+          rm artifact.tar.gz
 
       # Update the formula file
       - name: Update formula

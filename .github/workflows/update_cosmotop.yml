@@ -9,6 +9,8 @@ jobs:
   update-formula:
     name: Check and Update Cosmotop Formula
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       # Checkout the repository

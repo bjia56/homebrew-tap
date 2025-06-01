@@ -7,6 +7,6 @@ class Cosmotop < Formula
   license "Apache-2.0"
 
   def install
-    bin.install "cosmotop"
+    libexec.install "cosmotop"
   end
 end

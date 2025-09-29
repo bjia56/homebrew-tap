@@ -1,9 +1,9 @@
 class Chimp < Formula
   desc "Cross-platform Hybrid Interpreted Meta-Program"
   homepage "https://github.com/bjia56/chimp"
-  version "v0.9.0"
+  version "v0.9.1"
   url "https://github.com/bjia56/chimp/releases/download/#{version}/chimplink"
-  sha256 "edb4086f26c2cba59151f14678c0c76e1ae9008ef415e35329571b9001f2fc3d"
+  sha256 "31a7662ebc8498436cc464de0f2857fb7c35b67cc4e5f623708f2524f062cffe"
   license "MIT"
 
   def install

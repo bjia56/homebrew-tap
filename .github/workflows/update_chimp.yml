@@ -34,20 +34,13 @@ jobs:
         id: check_version
         run: |
           current_version=$(grep '^  version' Formula/chimp.rb | sed 's/.*"\(.*\)"/\1/')
-          latest_release="${{ env.latest_release }}"
+          echo "current_version=$current_version" >> $GITHUB_ENV
           echo "Current version: $current_version"
-          echo "Latest release: $latest_release"
-          if [ "$current_version" = "$latest_release" ]; then
-            echo "has_update=false" >> $GITHUB_OUTPUT
-            echo "No update needed"
-          else
-            echo "has_update=true" >> $GITHUB_OUTPUT
-            echo "Update available"
-          fi
+          echo "Latest release: ${{ env.latest_release }}"
 
       # Download the artifact and calculate the sha256 checksum
       - name: Calculate sha256 checksum
-        if: steps.check_version.outputs.has_update == 'true'
+        if: env.current_version != env.latest_release
         id: calculate_checksum
         run: |
           curl -L -o artifact.tar.gz "${{ env.latest_asset_url }}"
@@ -58,7 +51,7 @@ jobs:
 
       # Update the formula file
       - name: Update formula
-        if: steps.check_version.outputs.has_update == 'true'
+        if: env.current_version != env.latest_release
         run: |
           latest_release="${{ env.latest_release }}"
           sha256_checksum="${{ env.sha256_checksum }}"
@@ -75,7 +68,7 @@ jobs:
 
       # Create a pull request
       - name: Create Pull Request
-        if: steps.check_version.outputs.has_update == 'true'
+        if: env.current_version != env.latest_release
         uses: peter-evans/create-pull-request@v5
         with:
           committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>

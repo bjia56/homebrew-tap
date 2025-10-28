@@ -1,9 +1,9 @@
 class Termnotes < Formula
   desc "A note taker in your terminal"
   homepage "https://github.com/bjia56/termnotes"
-  version "v0.2.0"
+  version "v0.2.1"
   url "https://github.com/bjia56/termnotes/releases/download/#{version}/termnotes.exe"
-  sha256 "6abae6e1a24cbea9708f83ca5e9065c02e4a76ba1c8794c1908740b11e5bd6a1"
+  sha256 "d4adc2693fb3983d51a6e02b24baf37560e605b972175ff029d4c64d91d1fc5d"
   license "MIT"
 
   def install

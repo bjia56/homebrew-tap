@@ -8,9 +8,9 @@ on:
 jobs:
   update-formula:
     name: Check and Update Cosmotop Formula
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
-      contents: write  
+      contents: write
       pull-requests: write
 
     steps:

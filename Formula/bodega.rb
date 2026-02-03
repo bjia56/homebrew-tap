@@ -1,9 +1,9 @@
 class Bodega < Formula
   desc "Git-native issue tracking for developers and AI agents"
   homepage "https://github.com/bjia56/bodega"
-  version "v0.6.0"
+  version "v0.7.0"
   url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega"
-  sha256 "fc119e79b2fef99848a28e9064106a868f914766d36fec224de83e4e4721a534"
+  sha256 "9c4a455bbe6b823b770f8eb0659efb6ef1fc7d96743b499b225dd530f4039554"
   license "MIT"
 
   def install

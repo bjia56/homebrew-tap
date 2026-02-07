@@ -1,13 +1,13 @@
 class Bodega < Formula
   desc "Git-native issue tracking for developers and AI agents"
   homepage "https://github.com/bjia56/bodega"
-  version "v0.10.0"
+  version "v0.11.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
       url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-macos-x86_64"
-      sha256 "INTEL_MAC_SHA256_PLACEHOLDER"
+      sha256 "b69cb77d63f36463df08b7494cb0498434bd33335732e9051fd48de319fbbddf"
     else
       url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-macos-arm64"
       sha256 "ARM_MAC_SHA256_PLACEHOLDER"

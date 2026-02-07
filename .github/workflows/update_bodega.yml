@@ -23,37 +23,70 @@ jobs:
         id: get_latest_release
         run: |
           latest_release=$(curl --silent "https://api.github.com/repos/bjia56/bodega/releases/latest" | jq -r .tag_name)
-          latest_asset_url=$(curl --silent "https://api.github.com/repos/bjia56/bodega/releases/latest" | jq -r '.assets[0].browser_download_url')
           echo "Latest release: $latest_release"
-          echo "Latest asset URL: $latest_asset_url"
           echo "latest_release=$latest_release" >> $GITHUB_ENV
-          echo "latest_asset_url=$latest_asset_url" >> $GITHUB_ENV
 
-      # Download the artifact and calculate the sha256 checksum
-      - name: Calculate sha256 checksum
-        id: calculate_checksum
+      # Download all platform-specific artifacts and calculate sha256 checksums
+      - name: Calculate sha256 checksums
+        id: calculate_checksums
         run: |
-          curl -L -o artifact.tar.gz "${{ env.latest_asset_url }}"
-          sha256_checksum=$(shasum -a 256 artifact.tar.gz | awk '{print $1}')
-          echo "SHA256 checksum: $sha256_checksum"
-          echo "sha256_checksum=$sha256_checksum" >> $GITHUB_ENV
-          rm artifact.tar.gz
+          base_url="https://github.com/bjia56/bodega/releases/download/${{ env.latest_release }}"
+
+          # Download and calculate checksum for macOS x86_64
+          curl -L -o bodega-macos-x86_64 "$base_url/bodega-macos-x86_64"
+          sha256_macos_x86_64=$(shasum -a 256 bodega-macos-x86_64 | awk '{print $1}')
+          echo "macOS x86_64 SHA256: $sha256_macos_x86_64"
+          echo "sha256_macos_x86_64=$sha256_macos_x86_64" >> $GITHUB_ENV
+          rm bodega-macos-x86_64
+
+          # Download and calculate checksum for macOS ARM64
+          curl -L -o bodega-macos-arm64 "$base_url/bodega-macos-arm64"
+          sha256_macos_arm64=$(shasum -a 256 bodega-macos-arm64 | awk '{print $1}')
+          echo "macOS ARM64 SHA256: $sha256_macos_arm64"
+          echo "sha256_macos_arm64=$sha256_macos_arm64" >> $GITHUB_ENV
+          rm bodega-macos-arm64
+
+          # Download and calculate checksum for Linux x86_64
+          curl -L -o bodega-linux-x86_64 "$base_url/bodega-linux-x86_64"
+          sha256_linux_x86_64=$(shasum -a 256 bodega-linux-x86_64 | awk '{print $1}')
+          echo "Linux x86_64 SHA256: $sha256_linux_x86_64"
+          echo "sha256_linux_x86_64=$sha256_linux_x86_64" >> $GITHUB_ENV
+          rm bodega-linux-x86_64
+
+          # Download and calculate checksum for Linux ARM64
+          curl -L -o bodega-linux-arm64 "$base_url/bodega-linux-arm64"
+          sha256_linux_arm64=$(shasum -a 256 bodega-linux-arm64 | awk '{print $1}')
+          echo "Linux ARM64 SHA256: $sha256_linux_arm64"
+          echo "sha256_linux_arm64=$sha256_linux_arm64" >> $GITHUB_ENV
+          rm bodega-linux-arm64
 
       # Update the formula file
       - name: Update formula
         run: |
           latest_release="${{ env.latest_release }}"
-          sha256_checksum="${{ env.sha256_checksum }}"
+          sha256_macos_x86_64="${{ env.sha256_macos_x86_64 }}"
+          sha256_macos_arm64="${{ env.sha256_macos_arm64 }}"
+          sha256_linux_x86_64="${{ env.sha256_linux_x86_64 }}"
+          sha256_linux_arm64="${{ env.sha256_linux_arm64 }}"
           formula_file="Formula/bodega.rb"
 
-          # Replace the version and sha256 in the formula file
-          if [[ -f "$formula_file" ]]; then
-            sed -i "s/^  version \".*\"/  version \"$latest_release\"/" "$formula_file"
-            sed -i "s/^  sha256 \".*\"/  sha256 \"$sha256_checksum\"/" "$formula_file"
-          else
+          if [[ ! -f "$formula_file" ]]; then
             echo "Formula file not found!"
             exit 1
           fi
+
+          # Update version
+          sed -i "s/^  version \".*\"/  version \"$latest_release\"/" "$formula_file"
+
+          # Update SHA256 checksums for each platform
+          # macOS x86_64
+          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_macos_x86_64\"/" "$formula_file"
+          # macOS ARM64
+          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_macos_arm64\"/" "$formula_file"
+          # Linux x86_64
+          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_linux_x86_64\"/" "$formula_file"
+          # Linux ARM64
+          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_linux_arm64\"/" "$formula_file"
 
       # Create a pull request
       - name: Create Pull Request
@@ -68,5 +101,11 @@ jobs:
           delete-branch: true
           body: |
             This PR updates the `bodega` formula to the latest release: `${{ env.latest_release }}`.
-            - **Version**: `${{ env.latest_release }}`
-            - **SHA256**: `${{ env.sha256_checksum }}`
+
+            **Version**: `${{ env.latest_release }}`
+
+            **SHA256 Checksums**:
+            - macOS x86_64: `${{ env.sha256_macos_x86_64 }}`
+            - macOS ARM64: `${{ env.sha256_macos_arm64 }}`
+            - Linux x86_64: `${{ env.sha256_linux_x86_64 }}`
+            - Linux ARM64: `${{ env.sha256_linux_arm64 }}`

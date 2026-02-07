@@ -1,18 +1,31 @@
 class Bodega < Formula
   desc "Git-native issue tracking for developers and AI agents"
   homepage "https://github.com/bjia56/bodega"
-  version "v0.10.0"
-  url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega"
-  sha256 "e486c2b6718ccf1bd9bd7069450e7dc470f7a35584ca3d7f382e4fb53f442dae"
+  version "v0.11.0"
   license "MIT"
 
+  on_macos do
+    if Hardware::CPU.intel?
+      url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-macos-x86_64"
+      sha256 "INTEL_MAC_SHA256_PLACEHOLDER"
+    else
+      url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-macos-arm64"
+      sha256 "ARM_MAC_SHA256_PLACEHOLDER"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.intel?
+      url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-linux-x86_64"
+      sha256 "INTEL_LINUX_SHA256_PLACEHOLDER"
+    else
+      url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-linux-arm64"
+      sha256 "ARM_LINUX_SHA256_PLACEHOLDER"
+    end
+  end
+
   def install
-    libexec.install "bodega"
-    launcher = <<~EOS
-      #!/bin/bash
-      chmod +x "#{prefix}/libexec/bodega" >/dev/null 2>&1
-      exec sh "#{prefix}/libexec/bodega" "$@"
-    EOS
-    (bin/"bodega").write launcher
+    bin.install Dir["bodega-*"].first => "bodega"
+    chmod 0755, bin/"bodega"
   end
 end

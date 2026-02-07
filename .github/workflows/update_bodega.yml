@@ -78,15 +78,20 @@ jobs:
           # Update version
           sed -i "s/^  version \".*\"/  version \"$latest_release\"/" "$formula_file"
 
-          # Update SHA256 checksums for each platform
-          # macOS x86_64
-          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_macos_x86_64\"/" "$formula_file"
-          # macOS ARM64
-          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_macos_arm64\"/" "$formula_file"
-          # Linux x86_64
-          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_linux_x86_64\"/" "$formula_file"
-          # Linux ARM64
-          sed -i "0,/sha256 \".*\"/s//sha256 \"$sha256_linux_arm64\"/" "$formula_file"
+          # Update SHA256 checksums using awk to replace specific occurrences
+          awk -v macos_x86="$sha256_macos_x86_64" \
+              -v macos_arm="$sha256_macos_arm64" \
+              -v linux_x86="$sha256_linux_x86_64" \
+              -v linux_arm="$sha256_linux_arm64" '
+          /sha256 ".*"/ {
+            count++
+            if (count == 1) { sub(/".*"/, "\"" macos_x86 "\""); print; next }
+            if (count == 2) { sub(/".*"/, "\"" macos_arm "\""); print; next }
+            if (count == 3) { sub(/".*"/, "\"" linux_x86 "\""); print; next }
+            if (count == 4) { sub(/".*"/, "\"" linux_arm "\""); print; next }
+          }
+          { print }
+          ' "$formula_file" > "$formula_file.tmp" && mv "$formula_file.tmp" "$formula_file"
 
       # Create a pull request
       - name: Create Pull Request

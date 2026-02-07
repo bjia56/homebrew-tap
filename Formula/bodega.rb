@@ -1,7 +1,7 @@
 class Bodega < Formula
   desc "Git-native issue tracking for developers and AI agents"
   homepage "https://github.com/bjia56/bodega"
-  version "v0.11.0"
+  version "v0.10.0"
   license "MIT"
 
   on_macos do

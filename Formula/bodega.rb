@@ -1,26 +1,26 @@
 class Bodega < Formula
   desc "Git-native issue tracking for developers and AI agents"
   homepage "https://github.com/bjia56/bodega"
-  version "v0.11.2"
+  version "v0.12.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
       url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-macos-x86_64"
-      sha256 "33785c844aa11b04faae79394b95f757f7d379b5d597abfe035a4352d4f276ae"
+      sha256 "fb6f15742f4c2bc4da1a878eb7da6c6aee1039be2d47a3f31784d82f09598afd"
     else
       url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-macos-arm64"
-      sha256 "5f88c7220d50ad1a0682e52b6fa96a1df6aec54883e097e8f444eb3b9c757ec2"
+      sha256 "fb81fbfb7be9cddeb0a2ac825b3f7cc348994f488a312a2f2513ea430c5a6647"
     end
   end
 
   on_linux do
     if Hardware::CPU.intel?
       url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-linux-x86_64"
-      sha256 "7d65f065cc955e10ea1da14298316b4e25b6ccbfb33b0ebc2c82fd76d8958e01"
+      sha256 "db2ba6564d10a29c92a5b9f1f49affa1fe1a151ee38faad909dfba89c5d7eb70"
     else
       url "https://github.com/bjia56/bodega/releases/download/#{version}/bodega-linux-arm64"
-      sha256 "de126d114cb55f63986f2ab7426a5a90aeded7a3de38515244efc28e334c2fd0"
+      sha256 "89bf605ed471653fb8fa0c4fec34eb832ece6e2a85036825ba36fcaf377ee48e"
     end
   end
 

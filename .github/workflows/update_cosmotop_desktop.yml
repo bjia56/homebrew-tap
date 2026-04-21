@@ -1,0 +1,126 @@
+name: Update Cosmotop Desktop Formula
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch: # Allow manual triggering of the workflow
+
+jobs:
+  update-formula:
+    name: Check and Update Cosmotop Desktop Formula
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Get latest release
+        id: get_latest_release
+        run: |
+          latest_release=$(curl --silent "https://api.github.com/repos/bjia56/cosmotop/releases/latest" | jq -r .tag_name)
+          echo "Latest release: $latest_release"
+          echo "latest_release=$latest_release" >> $GITHUB_ENV
+
+      - name: Check if version changed
+        id: check_version
+        run: |
+          formula_file="Formula/cosmotop_desktop.rb"
+          current_version=$(grep -oP '(?<=version ").*(?=")' "$formula_file" | head -1)
+          echo "Current version: $current_version"
+          echo "Latest release: ${{ env.latest_release }}"
+          if [[ "$current_version" == "${{ env.latest_release }}" ]]; then
+            echo "version_changed=false" >> $GITHUB_ENV
+          else
+            echo "version_changed=true" >> $GITHUB_ENV
+          fi
+
+      - name: Calculate sha256 checksums
+        if: env.version_changed == 'true'
+        run: |
+          base_url="https://github.com/bjia56/cosmotop/releases/download/${{ env.latest_release }}"
+
+          # macOS: source tarball
+          curl -L -o source.tar.gz "https://github.com/bjia56/cosmotop/archive/refs/tags/${{ env.latest_release }}.tar.gz"
+          sha256_macos_source=$(shasum -a 256 source.tar.gz | awk '{print $1}')
+          echo "macOS source SHA256: $sha256_macos_source"
+          echo "sha256_macos_source=$sha256_macos_source" >> $GITHUB_ENV
+          rm source.tar.gz
+
+          # macOS: embedded cosmotop runtime
+          curl -L -o cosmotop "$base_url/cosmotop"
+          sha256_cosmotop_runtime=$(shasum -a 256 cosmotop | awk '{print $1}')
+          echo "cosmotop runtime SHA256: $sha256_cosmotop_runtime"
+          echo "sha256_cosmotop_runtime=$sha256_cosmotop_runtime" >> $GITHUB_ENV
+          rm cosmotop
+
+          # Linux amd64
+          curl -L -o cosmotop-desktop-linux-amd64 "$base_url/cosmotop-desktop-linux-amd64"
+          sha256_linux_amd64=$(shasum -a 256 cosmotop-desktop-linux-amd64 | awk '{print $1}')
+          echo "Linux amd64 SHA256: $sha256_linux_amd64"
+          echo "sha256_linux_amd64=$sha256_linux_amd64" >> $GITHUB_ENV
+          rm cosmotop-desktop-linux-amd64
+
+          # Linux arm64
+          curl -L -o cosmotop-desktop-linux-arm64 "$base_url/cosmotop-desktop-linux-arm64"
+          sha256_linux_arm64=$(shasum -a 256 cosmotop-desktop-linux-arm64 | awk '{print $1}')
+          echo "Linux arm64 SHA256: $sha256_linux_arm64"
+          echo "sha256_linux_arm64=$sha256_linux_arm64" >> $GITHUB_ENV
+          rm cosmotop-desktop-linux-arm64
+
+      - name: Update formula
+        if: env.version_changed == 'true'
+        run: |
+          latest_release="${{ env.latest_release }}"
+          sha256_macos_source="${{ env.sha256_macos_source }}"
+          sha256_cosmotop_runtime="${{ env.sha256_cosmotop_runtime }}"
+          sha256_linux_amd64="${{ env.sha256_linux_amd64 }}"
+          sha256_linux_arm64="${{ env.sha256_linux_arm64 }}"
+          formula_file="Formula/cosmotop_desktop.rb"
+
+          if [[ ! -f "$formula_file" ]]; then
+            echo "Formula file not found!"
+            exit 1
+          fi
+
+          # Update version
+          sed -i "s/^  version \".*\"/  version \"$latest_release\"/" "$formula_file"
+
+          # Update SHA256 checksums using awk to replace specific occurrences
+          awk -v macos_source="$sha256_macos_source" \
+              -v cosmotop_runtime="$sha256_cosmotop_runtime" \
+              -v linux_amd64="$sha256_linux_amd64" \
+              -v linux_arm64="$sha256_linux_arm64" '
+          /sha256 ".*"/ {
+            count++
+            if (count == 1) { sub(/".*"/, "\"" macos_source "\""); print; next }
+            if (count == 2) { sub(/".*"/, "\"" cosmotop_runtime "\""); print; next }
+            if (count == 3) { sub(/".*"/, "\"" linux_amd64 "\""); print; next }
+            if (count == 4) { sub(/".*"/, "\"" linux_arm64 "\""); print; next }
+          }
+          { print }
+          ' "$formula_file" > "$formula_file.tmp" && mv "$formula_file.tmp" "$formula_file"
+
+      - name: Create Pull Request
+        if: env.version_changed == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        with:
+          committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          commit-message: "Update cosmotop-desktop formula to ${{ env.latest_release }}"
+          title: "Update cosmotop-desktop formula to ${{ env.latest_release }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-cosmotop-desktop-formula
+          delete-branch: true
+          body: |
+            This PR updates the `cosmotop-desktop` formula to the latest release: `${{ env.latest_release }}`.
+
+            **Version**: `${{ env.latest_release }}`
+
+            **SHA256 Checksums**:
+            - macOS source tarball: `${{ env.sha256_macos_source }}`
+            - cosmotop runtime (embedded): `${{ env.sha256_cosmotop_runtime }}`
+            - Linux amd64: `${{ env.sha256_linux_amd64 }}`
+            - Linux arm64: `${{ env.sha256_linux_arm64 }}`

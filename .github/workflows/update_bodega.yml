@@ -26,8 +26,23 @@ jobs:
           echo "Latest release: $latest_release"
           echo "latest_release=$latest_release" >> $GITHUB_ENV
 
+      # Check if the version in the formula already matches the latest release
+      - name: Check if version changed
+        id: check_version
+        run: |
+          formula_file="Formula/bodega.rb"
+          current_version=$(grep -oP '(?<=version ").*(?=")' "$formula_file" | head -1)
+          echo "Current version: $current_version"
+          echo "Latest release: ${{ env.latest_release }}"
+          if [[ "$current_version" == "${{ env.latest_release }}" ]]; then
+            echo "version_changed=false" >> $GITHUB_ENV
+          else
+            echo "version_changed=true" >> $GITHUB_ENV
+          fi
+
       # Download all platform-specific artifacts and calculate sha256 checksums
       - name: Calculate sha256 checksums
+        if: env.version_changed == 'true'
         id: calculate_checksums
         run: |
           base_url="https://github.com/bjia56/bodega/releases/download/${{ env.latest_release }}"
@@ -62,6 +77,7 @@ jobs:
 
       # Update the formula file
       - name: Update formula
+        if: env.version_changed == 'true'
         run: |
           latest_release="${{ env.latest_release }}"
           sha256_macos_x86_64="${{ env.sha256_macos_x86_64 }}"
@@ -95,6 +111,7 @@ jobs:
 
       # Create a pull request
       - name: Create Pull Request
+        if: env.version_changed == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>

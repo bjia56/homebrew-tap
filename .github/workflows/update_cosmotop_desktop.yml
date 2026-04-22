@@ -88,17 +88,18 @@ jobs:
           # Update version
           sed -i "s/^  version \".*\"/  version \"$latest_release\"/" "$formula_file"
 
-          # Update SHA256 checksums using awk to replace specific occurrences
+          # Update cosmotop runtime SHA256 constant
+          sed -i "s/^  COSMOTOP_RUNTIME_SHA256 = \".*\"/  COSMOTOP_RUNTIME_SHA256 = \"$sha256_cosmotop_runtime\"/" "$formula_file"
+
+          # Update remaining SHA256 checksums using awk to replace specific occurrences
           awk -v macos_source="$sha256_macos_source" \
-              -v cosmotop_runtime="$sha256_cosmotop_runtime" \
               -v linux_amd64="$sha256_linux_amd64" \
               -v linux_arm64="$sha256_linux_arm64" '
           /sha256 ".*"/ {
             count++
             if (count == 1) { sub(/".*"/, "\"" macos_source "\""); print; next }
-            if (count == 2) { sub(/".*"/, "\"" cosmotop_runtime "\""); print; next }
-            if (count == 3) { sub(/".*"/, "\"" linux_amd64 "\""); print; next }
-            if (count == 4) { sub(/".*"/, "\"" linux_arm64 "\""); print; next }
+            if (count == 2) { sub(/".*"/, "\"" linux_amd64 "\""); print; next }
+            if (count == 3) { sub(/".*"/, "\"" linux_arm64 "\""); print; next }
           }
           { print }
           ' "$formula_file" > "$formula_file.tmp" && mv "$formula_file.tmp" "$formula_file"

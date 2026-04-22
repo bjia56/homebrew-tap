@@ -27,7 +27,7 @@ jobs:
       - name: Check if version changed
         id: check_version
         run: |
-          formula_file="Formula/cosmotop_desktop.rb"
+          formula_file="Formula/cosmotop-desktop.rb"
           current_version=$(grep -oP '(?<=version ").*(?=")' "$formula_file" | head -1)
           echo "Current version: $current_version"
           echo "Latest release: ${{ env.latest_release }}"
@@ -78,7 +78,7 @@ jobs:
           sha256_cosmotop_runtime="${{ env.sha256_cosmotop_runtime }}"
           sha256_linux_amd64="${{ env.sha256_linux_amd64 }}"
           sha256_linux_arm64="${{ env.sha256_linux_arm64 }}"
-          formula_file="Formula/cosmotop_desktop.rb"
+          formula_file="Formula/cosmotop-desktop.rb"
 
           if [[ ! -f "$formula_file" ]]; then
             echo "Formula file not found!"

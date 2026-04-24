@@ -1,14 +1,14 @@
 class CosmotopDesktop < Formula
   desc "Desktop launcher for the Cosmotop TUI system monitor"
   homepage "https://github.com/bjia56/cosmotop"
-  version "v0.15.0b1"
+  version "v0.15.0"
   license "Apache-2.0"
 
-  COSMOTOP_RUNTIME_SHA256 = "3f85f479432efaff2b59861df04ba2ce523833a9d07e4b1da38a814831077243"
+  COSMOTOP_RUNTIME_SHA256 = "b8229ac39bfaa42d208dae665401b57713f83c633c2a7df5ee01c409e924ea36"
 
   on_macos do
     url "https://github.com/bjia56/cosmotop/archive/refs/tags/#{version}.tar.gz"
-    sha256 "a3ca1e2f8eff4920288546bf49fa21389cde33280a064af6929f0a282f9dec7e"
+    sha256 "5e7dc771824bb630333e3b5b9e099823291cf0d480a9bc309d5a656a2a66e136"
 
     depends_on "go" => :build
     depends_on "node" => :build
@@ -18,10 +18,10 @@ class CosmotopDesktop < Formula
   on_linux do
     if Hardware::CPU.intel?
       url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop-desktop-linux-x86_64"
-      sha256 "8f744209281e30a22700a7a1c481b244135d95ea00989eae3580661fb746a96b"
+      sha256 "4d2c8ab76627c1a710855e8eb45d9f70eb2dd59a2b5ef445fc0573286f57d31a"
     else
       url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop-desktop-linux-aarch64"
-      sha256 "a21f2480b7a0329c0c87c3ef08c9e295dca38767f9b089783efc822e4cea7f14"
+      sha256 "15bf2946e0e3723f2f74d11721adc2f861b2c4c07856e3e9c5e1d4a7f927eec3"
     end
   end
 

@@ -17,10 +17,10 @@ class CosmotopDesktop < Formula
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop-desktop-linux-amd64"
+      url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop-desktop-linux-x86_64"
       sha256 "8f744209281e30a22700a7a1c481b244135d95ea00989eae3580661fb746a96b"
     else
-      url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop-desktop-linux-arm64"
+      url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop-desktop-linux-aarch64"
       sha256 "a21f2480b7a0329c0c87c3ef08c9e295dca38767f9b089783efc822e4cea7f14"
     end
   end

@@ -1,9 +1,9 @@
 class Cosmotop < Formula
   desc "Multiplatform system monitoring tool using Cosmopolitan Libc"
   homepage "https://github.com/bjia56/cosmotop"
-  version "v0.15.0"
+  version "v0.15.2"
   url "https://github.com/bjia56/cosmotop/releases/download/#{version}/cosmotop"
-  sha256 "b8229ac39bfaa42d208dae665401b57713f83c633c2a7df5ee01c409e924ea36"
+  sha256 "3de8b2ac54d7cbce90ccfeb66ffceded10344db1ccf74a5593b46b6bf3537c17"
   license "Apache-2.0"
 
   def install
